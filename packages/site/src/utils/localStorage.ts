@@ -1,18 +1,27 @@
 /**
+ * Assert that local storage is available and return it.
+ *
+ * @returns The local storage instance.
+ * @throws If local storage is not available.
+ */
+function assertLocalStorage(): Storage {
+  const { localStorage: ls } = window;
+
+  if (ls !== null) {
+    return ls;
+  }
+
+  throw new Error('Local storage is not available.');
+}
+
+/**
  * Get a local storage key.
  *
  * @param key - The local storage key to access.
  * @returns The value stored at the key provided if the key exists.
  */
 export const getLocalStorage = (key: string) => {
-  const { localStorage: ls } = window;
-
-  if (ls !== null) {
-    const data = ls.getItem(key);
-    return data;
-  }
-
-  throw new Error('Local storage is not available.');
+  return assertLocalStorage().getItem(key);
 };
 
 /**
@@ -22,12 +31,5 @@ export const getLocalStorage = (key: string) => {
  * @param value - The value to set.
  */
 export const setLocalStorage = (key: string, value: string) => {
-  const { localStorage: ls } = window;
-
-  if (ls !== null) {
-    ls.setItem(key, value);
-    return;
-  }
-
-  throw new Error('Local storage is not available.');
+  assertLocalStorage().setItem(key, value);
 };

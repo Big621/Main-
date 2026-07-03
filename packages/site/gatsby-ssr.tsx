@@ -1,15 +1,12 @@
 import type { GatsbySSR } from 'gatsby';
-import { StrictMode } from 'react';
 
-import { App } from './src/App';
-import { Root } from './src/Root';
+import {
+  wrapPageElement as sharedWrapPageElement,
+  wrapRootElement as sharedWrapRootElement,
+} from './src/gatsby-wrappers';
 
-export const wrapRootElement: GatsbySSR['wrapRootElement'] = ({ element }) => (
-  <StrictMode>
-    <Root>{element}</Root>
-  </StrictMode>
-);
+export const wrapRootElement: GatsbySSR['wrapRootElement'] = ({ element }) =>
+  sharedWrapRootElement(element);
 
-export const wrapPageElement: GatsbySSR['wrapPageElement'] = ({ element }) => (
-  <App>{element}</App>
-);
+export const wrapPageElement: GatsbySSR['wrapPageElement'] = ({ element }) =>
+  sharedWrapPageElement(element);

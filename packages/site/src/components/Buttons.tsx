@@ -1,11 +1,11 @@
 import type { ComponentProps } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { ReactComponent as FlaskFox } from '../assets/flask_fox.svg';
 import { useMetaMask, useRequestSnap } from '../hooks';
 import { shouldDisplayReconnectButton } from '../utils';
 
-const Link = styled.a`
+const interactiveBaseStyles = css`
   display: flex;
   align-self: flex-start;
   align-items: center;
@@ -15,8 +15,12 @@ const Link = styled.a`
   border: 1px solid ${(props) => props.theme.colors.background?.inverse};
   background-color: ${(props) => props.theme.colors.background?.inverse};
   color: ${(props) => props.theme.colors.text?.inverse};
-  text-decoration: none;
   font-weight: bold;
+`;
+
+const Link = styled.a`
+  ${interactiveBaseStyles}
+  text-decoration: none;
   padding: 1rem;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -49,16 +53,7 @@ const ButtonText = styled.span`
 `;
 
 const ConnectedContainer = styled.div`
-  display: flex;
-  align-self: flex-start;
-  align-items: center;
-  justify-content: center;
-  font-size: ${(props) => props.theme.fontSizes.small};
-  border-radius: ${(props) => props.theme.radii.button};
-  border: 1px solid ${(props) => props.theme.colors.background?.inverse};
-  background-color: ${(props) => props.theme.colors.background?.inverse};
-  color: ${(props) => props.theme.colors.text?.inverse};
-  font-weight: bold;
+  ${interactiveBaseStyles}
   padding: 1.2rem;
 `;
 
@@ -77,23 +72,25 @@ export const InstallFlaskButton = () => (
   </Link>
 );
 
-export const ConnectButton = (props: ComponentProps<typeof Button>) => {
+const FlaskButton = ({
+  label,
+  ...props
+}: ComponentProps<typeof Button> & { label: string }) => {
   return (
     <Button {...props}>
       <FlaskFox />
-      <ButtonText>Connect</ButtonText>
+      <ButtonText>{label}</ButtonText>
     </Button>
   );
 };
 
-export const ReconnectButton = (props: ComponentProps<typeof Button>) => {
-  return (
-    <Button {...props}>
-      <FlaskFox />
-      <ButtonText>Reconnect</ButtonText>
-    </Button>
-  );
-};
+export const ConnectButton = (props: ComponentProps<typeof Button>) => (
+  <FlaskButton label="Connect" {...props} />
+);
+
+export const ReconnectButton = (props: ComponentProps<typeof Button>) => (
+  <FlaskButton label="Reconnect" {...props} />
+);
 
 export const SendHelloButton = (props: ComponentProps<typeof Button>) => {
   return <Button {...props}>Send message</Button>;
