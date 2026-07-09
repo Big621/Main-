@@ -27,9 +27,8 @@ export const useRequestSnap = (
       params: {
         [snapId]: version ? { version } : {},
       },
-    })) as Record<string, Snap>;
+    })) as Record<string, Snap> | null;
 
-    // Updates the `installedSnap` context variable since we just installed the Snap.
     setInstalledSnap(snaps?.[snapId] ?? null);
   };
 

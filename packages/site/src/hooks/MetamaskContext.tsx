@@ -38,7 +38,15 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    getSnapsProvider().then(setProvider).catch(console.error);
+    getSnapsProvider()
+      .then(setProvider)
+      .catch((providerError: unknown) => {
+        setError(
+          providerError instanceof Error
+            ? providerError
+            : new Error(String(providerError)),
+        );
+      });
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useMetaMaskContext } from './MetamaskContext';
 import { useRequest } from './useRequest';
@@ -11,7 +11,8 @@ import type { GetSnapsResponse } from '../types';
  * @returns The information.
  */
 export const useMetaMask = () => {
-  const { provider, setInstalledSnap, installedSnap } = useMetaMaskContext();
+  const { provider, setInstalledSnap, installedSnap, setError } =
+    useMetaMaskContext();
   const request = useRequest();
 
   const [isFlask, setIsFlask] = useState(false);
@@ -21,26 +22,27 @@ export const useMetaMask = () => {
   /**
    * Detect if the version of MetaMask is Flask.
    */
-  const detectFlask = async () => {
+  const detectFlask = useCallback(async () => {
     const clientVersion = await request({
       method: 'web3_clientVersion',
     });
 
-    const isFlaskDetected = (clientVersion as string[])?.includes('flask');
+    const isFlaskDetected =
+      Array.isArray(clientVersion) && clientVersion.includes('flask');
 
     setIsFlask(isFlaskDetected);
-  };
+  }, [request]);
 
   /**
    * Get the Snap informations from MetaMask.
    */
-  const getSnap = async () => {
+  const getSnap = useCallback(async () => {
     const snaps = (await request({
       method: 'wallet_getSnaps',
-    })) as GetSnapsResponse;
+    })) as GetSnapsResponse | null;
 
-    setInstalledSnap(snaps[defaultSnapOrigin] ?? null);
-  };
+    setInstalledSnap(snaps?.[defaultSnapOrigin] ?? null);
+  }, [request, setInstalledSnap]);
 
   useEffect(() => {
     const detect = async () => {
@@ -50,8 +52,14 @@ export const useMetaMask = () => {
       }
     };
 
-    detect().catch(console.error);
-  }, [provider]);
+    detect().catch((detectError: unknown) => {
+      setError(
+        detectError instanceof Error
+          ? detectError
+          : new Error(String(detectError)),
+      );
+    });
+  }, [provider, detectFlask, getSnap, setError]);
 
   return { isFlask, snapsDetected, installedSnap, getSnap };
 };
