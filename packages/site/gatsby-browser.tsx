@@ -1,17 +1,14 @@
 import type { GatsbyBrowser } from 'gatsby';
-import { StrictMode } from 'react';
 
-import { App } from './src/App';
-import { Root } from './src/Root';
+import {
+  wrapPageElement as sharedWrapPageElement,
+  wrapRootElement as sharedWrapRootElement,
+} from './src/gatsby-wrappers';
 
 export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({
   element,
-}) => (
-  <StrictMode>
-    <Root>{element}</Root>
-  </StrictMode>
-);
+}) => sharedWrapRootElement(element);
 
 export const wrapPageElement: GatsbyBrowser['wrapPageElement'] = ({
   element,
-}) => <App>{element}</App>;
+}) => sharedWrapPageElement(element);
