@@ -28,7 +28,7 @@ export const useMetaMask = () => {
     });
 
     const isFlaskDetected =
-      Array.isArray(clientVersion) && clientVersion.includes('flask');
+      typeof clientVersion === 'string' && clientVersion.includes('flask');
 
     setIsFlask(isFlaskDetected);
   }, [request]);
