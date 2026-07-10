@@ -111,12 +111,12 @@ const BalanceReadout = styled.div`
 `;
 
 const Index = () => {
-  const [balance, setBalance] = useState<AccountBalance | null>(null);
+  const [balances, setBalances] = useState<AccountBalance[] | null>(null);
   const { error } = useMetaMaskContext();
   const { isFlask, snapsDetected, installedSnap } = useMetaMask();
   const requestSnap = useRequestSnap();
   const invokeSnap = useInvokeSnap();
-  const getBalance = useGetBalance();
+  const getBalances = useGetBalance();
 
   const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
     ? isFlask
@@ -127,7 +127,7 @@ const Index = () => {
   };
 
   const handleGetBalanceClick = async () => {
-    setBalance(await getBalance());
+    setBalances(await getBalances());
   };
 
   return (
@@ -212,13 +212,16 @@ const Index = () => {
             description: (
               <>
                 Fetch and display the ETH balance of your connected MetaMask
-                account.
-                {balance && (
+                accounts.
+                {balances && (
                   <BalanceReadout>
-                    Account:{' '}
-                    {`${balance.account.slice(0, 6)}…${balance.account.slice(-4)}`}
-                    <br />
-                    Balance: {balance.balance} ETH
+                    {balances.map(({ account, balance }) => (
+                      <div key={account}>
+                        Account: {`${account.slice(0, 6)}…${account.slice(-4)}`}
+                        <br />
+                        Balance: {balance} ETH
+                      </div>
+                    ))}
                   </BalanceReadout>
                 )}
               </>

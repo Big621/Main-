@@ -7,42 +7,43 @@ export type AccountBalance = {
 };
 
 /**
- * Utility hook to fetch the connected account's ETH balance.
+ * Utility hook to fetch the connected accounts' ETH balances.
  *
- * @returns The getBalance wrapper method.
+ * @returns The getBalances wrapper method.
  */
 export const useGetBalance = () => {
   const request = useRequest();
 
   /**
-   * Get the connected account's ETH balance.
+   * Get the ETH balance for every connected account.
    *
-   * @returns The account and formatted balance, or null if unavailable.
+   * @returns The accounts and their formatted balances, or null if unavailable.
    */
-  const getBalance = async (): Promise<AccountBalance | null> => {
+  const getBalances = async (): Promise<AccountBalance[] | null> => {
     const accounts = (await request({
       method: 'eth_requestAccounts',
     })) as string[] | null;
-    const account = accounts?.[0];
 
-    if (!account) {
+    if (!accounts || accounts.length === 0) {
       return null;
     }
 
-    const balanceHex = (await request({
-      method: 'eth_getBalance',
-      params: [account, 'latest'],
-    })) as string | null;
+    const balances = await Promise.all(
+      accounts.map(async (account) => {
+        const balanceHex = (await request({
+          method: 'eth_getBalance',
+          params: [account, 'latest'],
+        })) as string | null;
 
-    if (!balanceHex) {
-      return null;
-    }
+        return {
+          account,
+          balance: balanceHex ? formatWeiHexToEth(balanceHex) : '0',
+        };
+      }),
+    );
 
-    return {
-      account,
-      balance: formatWeiHexToEth(balanceHex),
-    };
+    return balances;
   };
 
-  return getBalance;
+  return getBalances;
 };
