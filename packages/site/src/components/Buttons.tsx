@@ -85,11 +85,11 @@ const FlaskButton = ({
 };
 
 export const ConnectButton = (props: ComponentProps<typeof Button>) => (
-  <FlaskButton label="Connect" {...props} />
+  <FlaskButton {...props} label="Connect" />
 );
 
 export const ReconnectButton = (props: ComponentProps<typeof Button>) => (
-  <FlaskButton label="Reconnect" {...props} />
+  <FlaskButton {...props} label="Reconnect" />
 );
 
 export const SendHelloButton = (props: ComponentProps<typeof Button>) => {
