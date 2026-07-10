@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -112,7 +112,7 @@ const BalanceReadout = styled.div`
 
 const Index = () => {
   const [balances, setBalances] = useState<AccountBalance[] | null>(null);
-  const { error } = useMetaMaskContext();
+  const { provider, error } = useMetaMaskContext();
   const { isFlask, snapsDetected, installedSnap } = useMetaMask();
   const requestSnap = useRequestSnap();
   const invokeSnap = useInvokeSnap();
@@ -126,9 +126,33 @@ const Index = () => {
     await invokeSnap({ method: 'hello' });
   };
 
-  const handleGetBalanceClick = async () => {
+  const refreshBalances = useCallback(async () => {
     setBalances(await getBalances());
+  }, [getBalances]);
+
+  const handleGetBalanceClick = async () => {
+    await refreshBalances();
   };
+
+  useEffect(() => {
+    if (!provider || !balances) {
+      return undefined;
+    }
+
+    const handleChange = () => {
+      refreshBalances().catch(() => {
+        /* errors are surfaced via the MetaMask context */
+      });
+    };
+
+    provider.on('accountsChanged', handleChange);
+    provider.on('chainChanged', handleChange);
+
+    return () => {
+      provider.removeListener('accountsChanged', handleChange);
+      provider.removeListener('chainChanged', handleChange);
+    };
+  }, [provider, balances, refreshBalances]);
 
   return (
     <Container>
