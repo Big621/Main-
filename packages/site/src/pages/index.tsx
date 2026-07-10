@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
   ConnectButton,
+  GetBalanceButton,
   InstallFlaskButton,
   ReconnectButton,
   SendHelloButton,
@@ -11,9 +13,11 @@ import { defaultSnapOrigin } from '../config';
 import {
   useMetaMask,
   useInvokeSnap,
+  useGetBalance,
   useMetaMaskContext,
   useRequestSnap,
 } from '../hooks';
+import type { AccountBalance } from '../hooks';
 import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
 
 const Container = styled.div`
@@ -102,11 +106,17 @@ const ErrorMessage = styled.div`
   }
 `;
 
+const BalanceReadout = styled.div`
+  margin-top: 1.2rem;
+`;
+
 const Index = () => {
+  const [balances, setBalances] = useState<AccountBalance[] | null>(null);
   const { error } = useMetaMaskContext();
   const { isFlask, snapsDetected, installedSnap } = useMetaMask();
   const requestSnap = useRequestSnap();
   const invokeSnap = useInvokeSnap();
+  const getBalances = useGetBalance();
 
   const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
     ? isFlask
@@ -114,6 +124,10 @@ const Index = () => {
 
   const handleSendHelloClick = async () => {
     await invokeSnap({ method: 'hello' });
+  };
+
+  const handleGetBalanceClick = async () => {
+    setBalances(await getBalances());
   };
 
   return (
@@ -191,6 +205,35 @@ const Index = () => {
             Boolean(installedSnap) &&
             !shouldDisplayReconnectButton(installedSnap)
           }
+        />
+        <Card
+          content={{
+            title: 'Show asset balance',
+            description: (
+              <>
+                Fetch and display the ETH balance of your connected MetaMask
+                accounts.
+                {balances && (
+                  <BalanceReadout>
+                    {balances.map(({ account, balance }) => (
+                      <div key={account}>
+                        Account: {`${account.slice(0, 6)}…${account.slice(-4)}`}
+                        <br />
+                        Balance: {balance} ETH
+                      </div>
+                    ))}
+                  </BalanceReadout>
+                )}
+              </>
+            ),
+            button: (
+              <GetBalanceButton
+                onClick={handleGetBalanceClick}
+                disabled={!isMetaMaskReady}
+              />
+            ),
+          }}
+          disabled={!isMetaMaskReady}
         />
         <Notice>
           <p>
